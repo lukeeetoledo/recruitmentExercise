@@ -1,13 +1,20 @@
 <?php
-   $newLogUrl = 'https://netzwelt-devtest.azurewebsites.net/Territories/All';
-   $opt = array('http' => array(
+session_start();
+//verification
+    if(!isset($_SESSION['username'])){
+        header("Location: ../account/login.php");
+    }else{
+
+    $newLogUrl = 'https://netzwelt-devtest.azurewebsites.net/Territories/All';
+    $opt = array('http' => array(
                 'method'  => "GET",
-                'header'  => 'Content-type: application/json; charset=utf-8',
+                'header'  => 'Content-type: application/json; accept: */*',
                 ));
     $content = file_get_contents($newLogUrl);               
-    $json_pretty = json_encode($content);
-    $json = json_decode($json_pretty,JSON_PRETTY_PRINT);
+    $json = json_encode($content);
+    //$json = json_decode($json_pretty,JSON_PRETTY_PRINT);
     printf("<pre>%s</pre>", $json);
+    }
 
 ?>
 <!DOCTYPE html>
@@ -19,6 +26,6 @@
     <title>Homepage</title>
 </head>
 <body>
-   
+<a href="logout.php">Log Out Btn</a>
 </body>
 </html>
