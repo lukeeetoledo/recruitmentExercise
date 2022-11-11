@@ -26,6 +26,6 @@ session_start();
     <title>Homepage</title>
 </head>
 <body>
-<a href="logout.php">Log Out Btn</a>
+<a href="../logout.php">Log Out Btn</a>
 </body>
 </html>
