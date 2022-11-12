@@ -26,7 +26,7 @@ session_start();
         if($treeData[$i]["parent"] == null) {
             $parent ++;
             $tree .= "{";
-                $tree .='text : "'.$treeData[$i]["name"].'"';
+                $tree .='text : "'.'+'.$treeData[$i]["name"].'"+""';
                 $tree .=",selectable:true,state:{expanded:false, checked:true}";
                 $child = find_child($treeData[$i]["id"], $treeData);
                 $tree .=$child;
