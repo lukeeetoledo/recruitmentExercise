@@ -1,55 +1,17 @@
 <?php
+//starts session
     session_start();
-    //Checks if the user is already login, if not it stay on the log in page
-    if(!isset($_SESSION['username'])) {
-
-        if($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['username']) && isset($_POST['password'])){
-            //declaring variable for the username and password input from the user
-            
-            $username = $_POST['username'];
-            $password = $_POST['password'];
-            $_SESSION['username'] = "$username";
-
-           //setting up the url, headers, and data
-           $endpoint = "https://netzwelt-devtest.azurewebsites.net/Account/SignIn";
-           $headers = array(
-               "Accept: text/plain",
-               "Content-Type: application/json",
-           ); 
-           $data = <<<DATA
-           {
-               "username":"$username", "password":"$password"
-           } 
-           DATA;
-   
-           $curl = curl_init($endpoint);
-           curl_setopt($curl, CURLOPT_URL, $endpoint);
-           curl_setopt($curl, CURLOPT_POST, true);
-           curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-           curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-           curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-           //to get response and http code
-           $resp = curl_exec($curl);
-           $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-   
-           //for debug only!
-           curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-           curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-           curl_close($curl);
-
-           //if httpcode received 200 as a success response, the user will be redirected to the homepage 
-           if($httpcode == 200){
-               echo '<script>alert("Login Successful!");window.location.href="../home/index.php";</script>';
-           }else{
-               echo '<script>alert("Invalid username or password!");</script>';
-           }    
-       }
-    }else{
-        //If the user is already logged in, he or she will be redirected to the homepage
-        header("Location: ../home/index.php");
-    }
-        
-    
+//for error message
+$error="";
+if(isset($_SESSION["error"]) && $_SESSION["error"]!="") {
+    $error=$_SESSION["error"];
+    $_SESSION["error"]="";
+}
+//if user is already logged in
+if((isset($_SESSION["username"]) && $_SESSION["username"]!="")) {
+    header("location:../home/index.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -57,33 +19,52 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP cURL POST</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <title>Login</title>
+    <!-- STLYES -->
+    <link rel = "stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link rel= "stylesheet" href="../css/styles.css">
 </head>
+
 <body>
-    <h2 class="text-center">PHP cURL with POST Data</h2>
-    <hr>
-    <div class="card rounded-0 mx-auto col-lg-6 col-md-8 col-sm-12">
-        <div class="card-header">
-            <div class="card-title">Sample Form</div>
-        </div>
-        <div class="card-body">
-            <div class="container-fluid">
-                <form action="" method="POST" id="sample-form">
-                    <div class="mb-3">
-                        <label for="name" class="control-label">username</label>    
-                        <input type="text" class="form-control" id="username" name="username" required>
+    <div class = "container-fluid">
+        <div class = "row justify-content-center">
+            <div class="container d-flex align-items-center justify-content-center">
+                <form class = "form-container" method="post" action="../validation.php">
+                    <div class ="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-person-fill-lock" viewBox="0 0 16 16">
+                    <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 8c0 1 1 1 1 1h5v-1a1.9 1.9 0 0 1 .01-.2 4.49 4.49 0 0 1 1.534-3.693C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4Zm7 0a1 1 0 0 1 1-1v-1a2 2 0 1 1 4 0v1a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2Zm3-3a1 1 0 0 0-1 1v1h2v-1a1 1 0 0 0-1-1Z"/>
+                    </svg>
                     </div>
-                    <div class="mb-3">
-                        <label for="contact" class="control-label">password</label>
-                        <input type="text" class="form-control" id="password" name="password" required>
+                    <div class="form-group">
+                        <h3 for="logo">netzwelt Login</h3>
+                        <hr>
                     </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required placeholder ="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required placeholder ="Enter password">
+                    </div><br>
+                        <button type = "submit" class="btn btn-dark w-100">Submit</button>
+                        
+                <!-- displaying error message -->
+                <?php
+                    if($error!="") {
+                ?>
+                <hr class="my-4">
+                <div class="d-grid">
+                    <div class="alert alert-danger" role="alert">
+                        <?php 
+                            echo $error;
+                        ?>
+                    </div>
+                </div>
+                <?php
+                }
+                 ?>
                 </form>
-            </div>
-        </div>
-        <div class="card-footer py-1">
-            <div class="d-grid justify-content-center">
-                <button class="btn btn-primary rounded-0" form="sample-form">Submit</button>
             </div>
         </div>
     </div>
